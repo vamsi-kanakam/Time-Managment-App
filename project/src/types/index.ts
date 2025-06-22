@@ -8,7 +8,7 @@ export interface Task {
   estimatedTime: number; // in minutes
   completed: boolean;
   scheduledTime?: Date;
-  createdFrom?: 'diary' | 'manual';
+  createdFrom?: 'diary' | 'manual' | 'prompt';
 }
 
 export interface DiaryPhoto {

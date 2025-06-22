@@ -6,7 +6,12 @@ const mockSubjects = [
   { id: '2', name: 'Science', color: '#10B981' },
   { id: '3', name: 'English', color: '#8B5CF6' },
   { id: '4', name: 'History', color: '#F59E0B' },
-  { id: '5', name: 'Art', color: '#EF4444' }
+  { id: '5', name: 'Art', color: '#EF4444' },
+  { id: '6', name: 'Physics', color: '#06B6D4' },
+  { id: '7', name: 'Chemistry', color: '#84CC16' },
+  { id: '8', name: 'Biology', color: '#F97316' },
+  { id: '9', name: 'Geography', color: '#EC4899' },
+  { id: '10', name: 'General', color: '#6B7280' }
 ];
 
 export const useTasks = () => {
@@ -74,10 +79,14 @@ export const useTasks = () => {
     const newTask: Task = {
       ...task,
       id: Date.now().toString(),
-      createdFrom: 'manual'
+      createdFrom: task.createdFrom || 'manual'
     };
     setTasks(prev => [...prev, newTask]);
     return newTask;
+  }, []);
+
+  const addMultipleTasks = useCallback((newTasks: Task[]) => {
+    setTasks(prev => [...prev, ...newTasks]);
   }, []);
 
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
@@ -102,6 +111,7 @@ export const useTasks = () => {
     subjects: mockSubjects,
     processDiaryPhoto,
     addTask,
+    addMultipleTasks,
     updateTask,
     deleteTask,
     toggleTaskCompletion

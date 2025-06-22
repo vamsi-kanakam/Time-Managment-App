@@ -5,6 +5,7 @@ import { TaskList } from './components/TaskList';
 import { Calendar } from './components/Calendar';
 import { StudyTimer } from './components/StudyTimer';
 import { Navigation } from './components/Navigation';
+import { DeadlinePrompt } from './components/DeadlinePrompt';
 import { useTasks } from './hooks/useTasks';
 
 function App() {
@@ -17,11 +18,17 @@ function App() {
     addTask,
     updateTask,
     deleteTask,
-    toggleTaskCompletion
+    toggleTaskCompletion,
+    addMultipleTasks
   } = useTasks();
 
   const handleCameraCapture = (imageUrl: string) => {
     processDiaryPhoto(imageUrl);
+    setCurrentView('tasks');
+  };
+
+  const handleDeadlineTasksGenerated = (generatedTasks: any[]) => {
+    addMultipleTasks(generatedTasks);
     setCurrentView('tasks');
   };
 
@@ -32,6 +39,14 @@ function App() {
           <CameraCapture
             onCapture={handleCameraCapture}
             onBack={() => setCurrentView('dashboard')}
+          />
+        );
+      case 'deadline-prompt':
+        return (
+          <DeadlinePrompt
+            subjects={subjects}
+            onTasksGenerated={handleDeadlineTasksGenerated}
+            onClose={() => setCurrentView('dashboard')}
           />
         );
       case 'tasks':

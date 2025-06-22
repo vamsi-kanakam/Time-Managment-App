@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, CheckCircle, AlertCircle, BookOpen, Camera } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, BookOpen, Camera, MessageSquare } from 'lucide-react';
 import { Task } from '../types';
 
 interface DashboardProps {
@@ -36,13 +36,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ tasks, onNavigate }) => {
         <h1 className="text-4xl font-bold text-gray-900">StudyFlow</h1>
         <p className="text-xl text-gray-600">Your AI-powered study companion</p>
         
-        <button
-          onClick={() => onNavigate('camera')}
-          className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
-        >
-          <Camera size={20} />
-          Scan Homework Diary
-        </button>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            onClick={() => onNavigate('camera')}
+            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+          >
+            <Camera size={20} />
+            Scan Homework Diary
+          </button>
+          
+          <button
+            onClick={() => onNavigate('deadline-prompt')}
+            className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors shadow-lg"
+          >
+            <MessageSquare size={20} />
+            Describe Deadlines
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -126,9 +136,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ tasks, onNavigate }) => {
                     </h4>
                     <p className="text-sm text-gray-600">{task.subject} • {task.estimatedTime} min</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${priorityColors[task.priority]}`}>
-                    {task.priority.toUpperCase()}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${priorityColors[task.priority]}`}>
+                      {task.priority.toUpperCase()}
+                    </span>
+                    {task.createdFrom === 'prompt' && (
+                      <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                        AI Generated
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

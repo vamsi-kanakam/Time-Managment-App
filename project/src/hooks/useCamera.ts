@@ -1,58 +1,68 @@
 import { useState, useRef, useCallback } from 'react';
 
 export const useCamera = () => {
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   const startCamera = useCallback(async () => {
+    if (streamRef.current) {
+      console.log('[useCamera] Camera already started');
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
       });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setIsStreaming(true);
-        setHasPermission(true);
-      }
+      console.log('[useCamera] Got stream:', mediaStream);
+      streamRef.current = mediaStream;
+      setStream(mediaStream);
+      setHasPermission(true);
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('[useCamera] Error accessing camera:', error);
       setHasPermission(false);
+      throw error;
     }
   }, []);
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
+      console.log('[useCamera] Stopping camera stream.');
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
+      setStream(null);
     }
-    setIsStreaming(false);
   }, []);
 
-  const capturePhoto = useCallback(() => {
-    if (!videoRef.current) return null;
+  const isStreaming = !!stream;
 
-    const canvas = document.createElement('canvas');
-    const video = videoRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    
-    ctx.drawImage(video, 0, 0);
-    return canvas.toDataURL('image/jpeg', 0.8);
-  }, []);
+  const capturePhoto = useCallback(
+    (videoEl: HTMLVideoElement | null) => {
+      if (!videoEl || !isStreaming) {
+        console.error('[useCamera] Capture failed: Video element not available or not streaming.');
+        return null;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = videoEl.videoWidth;
+      canvas.height = videoEl.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        console.error('[useCamera] Capture failed: Could not get canvas context.');
+        return null;
+      }
+      ctx.drawImage(videoEl, 0, 0, videoEl.videoWidth, videoEl.videoHeight);
+      return canvas.toDataURL('image/jpeg', 0.9);
+    },
+    [isStreaming]
+  );
 
   return {
-    videoRef,
+    stream,
     isStreaming,
     hasPermission,
     startCamera,
     stopCamera,
-    capturePhoto
+    capturePhoto,
   };
 };

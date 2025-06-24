@@ -24,6 +24,30 @@ export const useTasks = () => {
 
   const extractTasksFromImage = useCallback(async (imageUrl: string): Promise<Task[]> => {
     try {
+      // Check if this is a text data URL (from document processing)
+      if (imageUrl.startsWith('data:text/plain;base64,')) {
+        const base64Text = imageUrl.split(',')[1];
+        const text = atob(base64Text);
+        const extractedTasks = taskParser.parseText(text);
+        
+        if (extractedTasks.length === 0) {
+          const fallbackTask: Task = {
+            id: Date.now().toString(),
+            title: 'Review document content',
+            subject: 'General',
+            description: text.substring(0, 200) + (text.length > 200 ? '...' : ''),
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            priority: 'medium',
+            estimatedTime: 60,
+            completed: false,
+            createdFrom: 'diary'
+          };
+          return [fallbackTask];
+        }
+        
+        return extractedTasks;
+      }
+
       // Use OCR to extract text from the image
       const ocrResult = await extractTextFromImage(imageUrl);
       
